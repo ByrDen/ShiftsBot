@@ -1,0 +1,44 @@
+services:
+  backend:
+    container_name: "shift_backend"
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: python -m backend
+    restart: always
+    volumes:
+      - "./app:/opt/app:ro"
+      - "./src:/opt/src:ro"
+      - "./backend:/opt/backend:ro"
+    ports:
+      - "80:80"
+    env_file:
+      - ".env"
+    depends_on:
+      - db
+
+  migrations:
+    container_name: "migrations_SB"
+    build:
+      context: .
+      dockerfile: migrations/Dockerfile
+    command: python -m migrations
+    volumes:
+      - "./migrations:/opt/migrations:rw"
+      - "./app/models:/opt/app/models:ro"
+      - "./auth/models:/opt/auth/models:ro"
+      - "./src:/opt/src:ro"
+    env_file:
+      - ".env"
+    depends_on:
+     - db
+
+  db:
+    container_name: "shift_db"
+    image: postgres:16-alpine3.19
+    hostname: "bh"
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: admin
