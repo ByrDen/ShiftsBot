@@ -1,5 +1,4 @@
 import datetime
-from datetime import date
 from typing import List
 
 from fastapi import HTTPException
@@ -25,6 +24,7 @@ class UserShiftService(AbstractRepository):
 
     async def get(self, user_id: int, date: datetime.date):
         obj = await self.repository.get_shifts_with_users(user_id=user_id, date=date)
+        print(obj)
         return self.detail_schema.model_validate(obj=obj)
 
     async def update(self, *args, **kwargs):
@@ -32,14 +32,17 @@ class UserShiftService(AbstractRepository):
 
     async def save(self, user_id: int, form: create_schema):
         try:
-            data= {**form.model_dump() | {"user_id": user_id}}
+            data = {**form.model_dump() | {"user_id": user_id}}
             obj = await self.repository.save(form=data)
         except DuplicateEntryError:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This Shift was add early")
         return self.detail_schema.model_validate(obj=obj)
 
-    async def delete(self, user_id: int, year):
-        pass
+    async def delete(self, user_id: int, date: datetime.date):
+        try:
+            await self.repository.delete_by_date(date=date)
+        except Exception:
+            raise HTTPException(status_code=422)
 
     async def list(
             self,
@@ -56,7 +59,7 @@ class UserShiftService(AbstractRepository):
 
     async def get_user_shifts_for_current_month(self, user_id: int, year: int, month: int) -> List[UserShiftDetail]:
         if not (year and month):
-            today = date.today()
+            today = datetime.date.today()
             year, month = today.year, today.month
 
         try:
@@ -69,3 +72,11 @@ class UserShiftService(AbstractRepository):
             raise HTTPException(status_code=404, detail=f"No shifts found for user with ID {user_id}")
 
         return [self.detail_schema.model_validate(shift) for shift in shifts]
+
+    async def get_list_shifts_for_current_month(self, year: int, month: int):
+        shifts = await self.repository.get_list_shifts_for_current_month(year, month)
+
+        if not shifts:
+            raise HTTPException(status_code=404)
+
+        return [self.detail_schema.model_validate(obj=obj) for obj in shifts]

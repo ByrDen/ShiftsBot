@@ -22,7 +22,7 @@ class UserShiftDetail(UserShiftCreateForm):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: Optional[PositiveInt] = Field(default=None)
-    users: Optional[list[UserDetail]] = Field(default=None)
+    users: Optional[list[str]] = Field(default=None)
     id: PositiveInt
 
 

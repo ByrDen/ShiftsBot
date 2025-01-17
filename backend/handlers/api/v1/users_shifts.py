@@ -1,6 +1,7 @@
 import datetime
 
-from fastapi import APIRouter, Path, Query, Depends
+from fastapi import APIRouter, Path, Query, Depends, HTTPException
+from starlette import status
 
 from app.schemas.users_shifts import UserShiftDetail, UserShiftCreateForm
 from app.services.user_shift_service import UserShiftService
@@ -38,22 +39,19 @@ async def add_users_shift(
 
 
 @router.delete(path="")
-async def delete(
+async def delete_shift(
         session: DBSession,
         user_id: int = Depends(validate_user),
-        year: int = Query(default=None, ge=2020),
-        month: int = Query(default=None, ge=1, le=12),
-        day: int = Query(default=None, ge=1, le=31)
+        year: int = Query(default=..., ge=2020),
+        month: int = Query(default=..., ge=1, le=12),
+        day: int = Query(default=..., ge=1, le=31)
 ):
     """ Удаление указанной смены пользователя, если день не указан,
         то будут удалены смены указанного(или текущего) месяца."""
-    today = datetime.date.today()
-    if not year:
-        year = today.year
-    if not month:
-        month = today.month
-    if day:
-        date = datetime.date(year, month, day)
-    service = UserShiftService(session=session)
-    shifts = await service.list(date=date)
-    return shifts
+    # today = datetime.date.today()
+    # year = today.year if (not year) else year
+    # month = today.month if not month else month
+    date = datetime.date(year, month, day)
+    await UserShiftService(session=session).delete(user_id=user_id, date=date)
+
+    return "OK"

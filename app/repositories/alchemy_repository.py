@@ -30,6 +30,8 @@ class SQLAlchemyRepository(AbstractRepository):
                 raise DuplicateEntryError("A unique constraint was violated.") from e
             if "foreign key constraint" in str(e).lower():
                 raise RepositoryError("Error from foreign key") from e
+            if "is not present in table" in str(e).lower():
+                raise ItemNotFound("Item with this id no found") from e
             # raise UnknownError from e
 
     async def get(self, pk: Any) -> Mapper:

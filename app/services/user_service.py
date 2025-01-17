@@ -41,7 +41,7 @@ class UserService(AbstractRepository):
         try:
             obj = await self.repository.save(form=form.model_dump())
         except DuplicateEntryError as e:
-            raise HTTPException(status_code=422, detail=e)
+            raise HTTPException(status_code=422, detail=f"User's with this {form.tg_id=} or ... exists")
         return self.detail_schema.model_validate(obj=obj)
 
     async def delete(self, pk: int):

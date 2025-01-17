@@ -19,6 +19,7 @@ class UserCreateForm(BaseModel):
 class UserEditForm(BaseModel):
     last_name: Optional[str] = Field(default=None, min_length=2, max_length=32, description="Роль пользователя")
     role: Optional[UserRole] = Field(default=None, description="Роль пользователя")
+    start_date: Optional[datetime.date] = Field(default=None)
     shift_template_id: Optional[PositiveInt] = Field(
         default=None, description="Шаблон смен для пользователя"
     )

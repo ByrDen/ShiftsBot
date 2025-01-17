@@ -6,3 +6,5 @@ from app.repositories.alchemy_repository import SQLAlchemyRepository
 
 class ScheduleTemplateRepositories(SQLAlchemyRepository):
     model = ScheduleTemplate
+
+
